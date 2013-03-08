@@ -1,0 +1,93 @@
+/*
+ *  CSS knowledge embiggening
+ * */
+body * {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+.app {
+  background: #dfdfdf;
+  border: 8px solid #E7E7E9;
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+/* vertical panes */
+.editor,
+.preview {
+  height: 100%;
+  position: relative;
+  width: 50%;
+}
+.editor {
+  float: left;
+}
+/* html & css editors */
+.css,
+.html {
+  background: #E7E7E9;
+  border: 4px soilid #000;
+  border-radius: 4px;
+  -webkit-user-select: text;
+     -mox-user-select: text;
+          user-select: text;
+}
+.css > textarea,
+.html > textarea {
+  border: 1px solid #BABCB9;
+  height: 100%;
+  width: 100%;
+}
+.css {
+  margin-bottom: 8px;
+}
+.html {
+
+}
+/* preview */
+.preview {
+  background: #fff;
+  border: 1px solid #BABCB9;
+  float: right;
+  padding: 32px;
+  -webkit-user-select: text;
+     -mox-user-select: text;
+          user-select: text;
+}
+.preview iframe {
+  height: 100%;
+  width: 100%;
+}
+
+.separator {
+  background: #E7E7E9;
+  display: block;
+  position: absolute;
+}
+
+.separator.horizontal {
+  height: 8px;
+  top: 50%;
+  width: 100%;
+}
+
+.separator.vertical {
+  height: 100%;
+  left: 50%;
+  width: 8px;
+}
+
+/* CodeMirror Stuff */
+.CodeMirror * {
+  -webkit-box-sizing: content-box;
+     -moz-box-sizing: content-box;
+          box-sizing: content-box;
+  font-size: 28px;
+}
+.CodeMirror {
+  background: #fff;
+  border: 1px solid #BABCB9;
+  height: 100%;
+}
