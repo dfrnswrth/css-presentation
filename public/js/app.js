@@ -1,12 +1,15 @@
-
 var App = function(el) {
   this.$el = el;
 
-  this.$editor = this.$el.find(".editor");
-  this.$preview = this.$el.find(".preview");
+  var self = this;
+  this.SLIDE = 0;
 
-  this.$css = this.$editor.find(".css");
-  this.$html = this.$editor.find(".html");
+  this.$editorWrap = this.$el.find(".editor");
+  this.$previewWrap = this.$el.find(".preview");
+  this.$preview = $("#rendered_preview");
+
+  this.$css = this.$editorWrap.find(".css");
+  this.$html = this.$editorWrap.find(".html");
 
   // dividers
   var separators = this.$el.find(".separator");
@@ -19,30 +22,69 @@ var App = function(el) {
   separators.on("drag", $.proxy(this.resizeBySplits, this))
             .on("dragEnd", $.proxy(this.separatorToPercentage, this));
 
-  // window events
-  $(window).on("resize", $.proxy(this.resizeApp, this))
-           .on("keyup", $.proxy(this.keyListener, this));
-
   this.$cssEditor = CodeMirror.fromTextArea(this.$css.find("textarea")[0], {
     wrapping: 'code_editor',
+    lineWrapping: true,
     lineNumbers: true,
     tabSize: 2,
     mode: "css"
   });
   this.$htmlEditor = CodeMirror.fromTextArea(this.$html.find("textarea")[0], {
     wrapping: 'code_editor',
+    lineWrapping: true,
     lineNumbers: true,
     tabSize: 2,
     mode: "htmlmixed"
   });
 
+  this.$cssEditor.on("change", function() {
+    self.updatePreviewFromEditor("css");
+  });
+  this.$htmlEditor.on("change", function() {
+    self.updatePreviewFromEditor("html");
+  });
+
+
+  // window events
+  $(window).on("resize", $.proxy(this.resizeApp, this))
+           .on("keyup", $.proxy(this.keyListener, this))
+           .on("iframe_ready", $.proxy(this.refreshPreview, this));
+
   // init
   this.resizeApp();
-
   this.$hsep.trigger("drag");
   this.$vsep.trigger("drag");
+
+  this.swapSlides();
 };
 App.prototype = {
+  swapSlides: function(direction) {
+    direction = direction || "next";
+    direction == "next" ? this.SLIDE++ : this.SLIDE--;
+    var slide = "ajax/slide-" + this.SLIDE + ".html";
+
+    this.$preview.attr("src", slide);
+  },
+  refreshPreview: function(data) {
+    this.$previewBody = this.$preview.contents().find("body");
+    this.$previewStyles = this.$preview.contents().find("#style");
+
+    this.setEditorFromPreview("css", this.$previewStyles.html());
+    this.setEditorFromPreview("html", this.$previewBody.html());
+  },
+  updatePreviewFromEditor: function(trigger) {
+    var editor = trigger == "css" ? this.$cssEditor : this.$htmlEditor;
+    var val = editor.getValue();
+    this.setPreviewValue(trigger, val);
+  },
+  setPreviewValue: function(type, value) {
+    var target = type == "css" ? this.$previewStyles : this.$previewBody;
+    target.html(value);
+  },
+  setEditorFromPreview: function(type, value) {
+    var target = type == "css" ? this.$cssEditor : this.$htmlEditor;
+    target.setValue(value);
+  },
   resizeBySplits: function(e) {
     var $t = $(e.currentTarget);
     var offset = $t.offset();
@@ -69,10 +111,10 @@ App.prototype = {
     });
   },
   resizeVerticalSplits: function() {
-    this.$editor.css({
+    this.$editorWrap.css({
       width: this.editorWidth
     });
-    this.$preview.css({
+    this.$previewWrap.css({
       width: this.previewWidth
     });
   },
@@ -106,8 +148,11 @@ App.prototype = {
     this.resizeEditorSplits();
     this.resizeVerticalSplits();
   }
-}
+};
 
 $(document).ready(function(){
   var app = new App($(".app"));
+  window.iframe_ready = function(){
+    $(window).trigger("iframe_ready");
+  };
 });
