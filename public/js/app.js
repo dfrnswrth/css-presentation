@@ -48,26 +48,32 @@ var App = function(el) {
   // window events
   $(window).on("resize", $.proxy(this.resizeApp, this))
            .on("keyup", $.proxy(this.keyListener, this))
-           .on("iframe_ready", $.proxy(this.refreshPreview, this));
+           .on("iframe_ready", $.proxy(this.refreshPreview, this))
+           .on("hashchange", $.proxy(this.getHashChange, this));
 
   // init
   this.resizeApp();
   this.$hsep.trigger("drag");
   this.$vsep.trigger("drag");
 
-  this.swapSlides();
+  this.getHashChange();
 };
 App.prototype = {
-  swapSlides: function(direction) {
-    direction = direction || "next";
-    direction == "next" ? this.SLIDE++ : this.SLIDE--;
-    var slide = "ajax/slide-" + this.SLIDE + ".html";
-
-    this.$preview.attr("src", slide);
+  getHashChange: function() {
+    this.SLIDE = parseInt(window.location.hash.replace(/#\//g, ""), 10) || 1;
+    this.moveToSlide();
   },
-  refreshPreview: function(data) {
-    this.$previewBody = this.$preview.contents().find("body");
-    this.$previewStyles = this.$preview.contents().find("#style");
+  moveToSlide: function() {
+    var slide = "ajax/slide-" + this.SLIDE + ".html";
+    this.$preview.attr("src", slide);
+    var self = this;
+    setTimeout(function(){
+      self.refreshPreview();
+    }, 20);
+  },
+  refreshPreview: function() {
+    this.$previewBody = this.$preview.contents().find("body") || '';
+    this.$previewStyles = this.$preview.contents().find("#style") || '';
 
     this.setEditorFromPreview("css", this.$previewStyles.html());
     this.setEditorFromPreview("html", this.$previewBody.html());
@@ -83,6 +89,7 @@ App.prototype = {
   },
   setEditorFromPreview: function(type, value) {
     var target = type == "css" ? this.$cssEditor : this.$htmlEditor;
+    value = value || '';
     target.setValue(value);
   },
   resizeBySplits: function(e) {
