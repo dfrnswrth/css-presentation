@@ -44,10 +44,9 @@ var App = function(el) {
     self.updatePreviewFromEditor("html");
   });
 
-
   // window events
   $(window).on("resize", $.proxy(this.resizeApp, this))
-           .on("keyup", $.proxy(this.keyListener, this))
+           .on("keydown", $.proxy(this.keyListener, this))
            .on("iframe_ready", $.proxy(this.refreshPreview, this))
            .on("hashchange", $.proxy(this.getHashChange, this));
 
@@ -142,10 +141,19 @@ App.prototype = {
   },
   keyListener: function(e) {
     var keys = [
-      219,  // [
-      221   // ]
+      190,  // >
+      188   // <
     ];
+    if (!e.metaKey && !e.shiftKey) return;
     var myKey = e.keyCode;
+    if (e.keyCode === 190) {
+      this.SLIDE++;
+    }
+    if (e.keyCode === 188) {
+      this.SLIDE--;
+    }
+    if (this.SLIDE <= 1) this.SLIDE = 1;
+    window.location.hash = "#/" + this.SLIDE;
   },
   resizeApp: function() {
     this.$el.css({
